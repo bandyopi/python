@@ -1,17 +1,17 @@
 import pandas as pd
 
-df = pd.read_csv("csse_covid_19_data\\csse_covid_19_time_series\\time_series_covid19_deaths_global.csv")
 num_days, top_n = 5, 25
+df = pd.read_csv("csse_covid_19_data\\csse_covid_19_time_series\\time_series_covid19_deaths_global.csv")
 
-# Find the latest date and short by the lates date desc
-latest_date = df.columns[-1]
-previous_date = df.columns[-2]
-df.sort_values(by=[latest_date], ascending=False, inplace=True)
+# Find the latest mortality, sort descending and take top_n
+df['increase'] = df[df.columns[-1]] - df[df.columns[-2]]
+df.sort_values(by=['increase'], ascending=False, inplace=True)
+df=df.head(top_n)
 
-# Find the last n columns
-last_col = df.columns.size
-last_n_col = df.columns[1:2].append(df.columns[last_col-num_days:last_col])
-top_df=df[last_n_col].head(top_n)
-
-print("Top", top_n, "countries by death asOf:", latest_date )
-print(pd.concat([top_df, top_df[latest_date].sub(top_df[previous_date]).to_frame('increase')], axis=1))
+# Update the last n columns with mortality increase from previous date
+cols = ['Country/Region']
+for i in range(2,num_days+2):
+    dt, prev_dt = df.columns[-i], df.columns[-i-1]
+    df[dt] = df[dt].map(str) + ' (' + (df[dt] - df[prev_dt]).map(str) + ')'
+    cols.append(dt)
+print(df[cols])
