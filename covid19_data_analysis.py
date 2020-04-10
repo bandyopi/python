@@ -1,25 +1,40 @@
-import pandas as pd, matplotlib.pyplot as plot
+import pandas as pd, matplotlib.pyplot as plt
 
-num_days, top_n = 5, 20
+num_days, top_n, country = 5, 20, 'Country/Region'
+
 df = pd.read_csv("csse_covid_19_data\\csse_covid_19_time_series\\time_series_covid19_deaths_global.csv")
-#df = df[df['Country/Region']=='Australia'] # Set the filter to get a specific Country
-df = df.groupby(by=['Country/Region'], as_index=False).sum()
-total_mortality = df[df.columns[-1]].sum()
+#df = df[df[country]=='Australia'] # Set the filter to get a specific Country
+df = df.groupby(by=[country], as_index=False).sum()
+dt_latest = df.columns[-1]
+total_mortality = df[dt_latest].sum()
 
-# Find the last n-day average mortality, sort descending and take top_n
-n_day_avg = str(num_days)+'DayAvg'
-df[n_day_avg] = (df[df.columns[-1]] - df[df.columns[-1-num_days]])/num_days
+# Find the last n-day moving average mortality for the last n days, sort descending and take top_n
+n_day_avg = str(num_days)+'DaySMA-'+dt_latest
+df[n_day_avg] = (df[dt_latest] - df[df.columns[-1-num_days]])/num_days
 df.sort_values(by=[n_day_avg], ascending=False, inplace=True)
 df = df.head(top_n)
+df_sma = pd.DataFrame()
+df_sma[country] = df[country]
+df_sma[dt_latest] = df[n_day_avg]
+for i in range(2, num_days+2):
+    dt, dt_prev = df.columns[-i], df.columns[-i-num_days]
+    df_sma[dt] = (df[dt] - df[dt_prev])/num_days
+#print(df_sma)
 
 # Update the last n columns with mortality increase from previous date
-cols = ['Country/Region', n_day_avg]
+cols = [country]
 for i in range(2,num_days+2):
-    dt, prev_dt = df.columns[-i], df.columns[-i-1]
-    df[dt] = df[dt].map(str) + ' [+' + (df[dt] - df[prev_dt]).map(str) + ']'
+    dt, dt_prev = df.columns[-i], df.columns[-i-1]
+    df[dt] = df[dt].map(str) + ' [+' + (df[dt] - df[dt_prev]).map(str) + ']'
     cols.append(dt)
-print('Displaying', num_days, 'days stats for top', top_n, 'countries by mortality. Total', 
-    total_mortality, 'reported mortalities asOf', df.columns[-2])
-print(df[cols])
-#ax=df.plot.bar(x='Country/Region', y=n_day_avg, rot=0)
-#plot.show()
+print('Displaying last', num_days, 'days stats for top', top_n, 'countries by mortality. Total', 
+    total_mortality, 'reported mortalities asOf', dt_latest)
+print(pd.concat([df[cols], df_sma], axis=1))
+
+# Plot the SMA for top 5 countries
+df_plt = df_sma.head(5)
+print(df_plt)
+ax = plt.gca()
+for i in range(1, num_days+1):
+    df_sma.head(5).plot(kind='line', x=country, y=df_plt.columns[-i], ax=ax)
+plt.show()
