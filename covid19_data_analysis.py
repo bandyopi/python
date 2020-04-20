@@ -1,8 +1,15 @@
-import pandas as pd, matplotlib.pyplot as plt
+import pandas as pd
+import matplotlib.pyplot as plt
+import requests
+from os import getcwd
+from io import StringIO
 
 num_days, top_n, country = 7, 20, 'Country/Region'
 
-df = pd.read_csv("csse_covid_19_data\\csse_covid_19_time_series\\time_series_covid19_deaths_global.csv")
+# Download file from GitHub using the "raw" url (note the "...COVID-19/blob/master/..." replace with "...COVID-19/master/...")
+covid_mortality_csv = requests.get('https://raw.github.com/CSSEGISandData/COVID-19/master/csse_covid_19_data/csse_covid_19_time_series/time_series_covid19_deaths_global.csv')
+df = pd.read_csv(StringIO(covid_mortality_csv.text)) # don't use .content as it returns bytes
+#df = pd.read_csv("csse_covid_19_data\\csse_covid_19_time_series\\time_series_covid19_deaths_global.csv")
 # df = df[df[country]=='India'] # Set the filter to get a specific Country
 df = df.groupby(by=[country], as_index=False).sum()
 dt_latest = df.columns[-1]
@@ -44,16 +51,17 @@ print(df[cols])
 df_plt = df_sma.head(5).set_index(country).T.iloc[::-1]
 dates = df_plt.index[0::7] # select every 7th day from the date list
 #print(dates)
-#ax = plt.gca()
-#ax.set_xlabels(df_plt.index)
-#for i in range(1, len(df.index)+1):
- #   df_plt.plot(kind='line', y=df_plt.columns[-i], x=country, ax=ax)
-#plt.xscale(df_plt.index)
 df_plt.plot(kind='line', )
+# Set plot Title and Axis labels
 plt.title(str(num_days) + ' day moving average mortality for top 5 countries')
 plt.xlabel('Date ->')
 plt.ylabel('Mortality (' + str(num_days) + ' Days SMA) ->')
-#plt.xticks(ticks=range(0, len(df_plt.index)), labels=df_plt.index, rotation='vertical')
+# Set Axis ticks
+plt.xticks(ticks=range(0, len(df_plt.index)), labels=df_plt.index, rotation='vertical')
 plt.yticks(ticks=range(0, int(df_plt.iat[len(df_plt.index)-1,0])+100, 100))
+# Show every 7th x tick label - hiding the rest
+[lbl.set_visible(False) for (i,lbl) in enumerate(plt.gca().xaxis.get_ticklabels()) if i % 7 != 0]
+# Show grid lines
 plt.grid(b=True, which='major', axis='y', color='lightgray', linewidth=1, linestyle='dotted')
+
 plt.show()
