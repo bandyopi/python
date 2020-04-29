@@ -39,7 +39,7 @@ for i in range(2,num_days+2):
     df[dt] = df[dt].map(str) + ' [+' + (df[dt] - df[dt_prev]).map(str) + ']'
     cols.append(dt)
 print('Displaying last', num_days, 'days stats for top', top_n, 'countries by mortality. Total', 
-    total_mortality, 'reported mortalities asOf', dt_latest)
+    f"{total_mortality:,d}", 'reported mortalities asOf', dt_latest)
 print(df[cols])
 #print(pd.concat([df[cols], df_sma], axis=1))
 
