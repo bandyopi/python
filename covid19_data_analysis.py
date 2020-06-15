@@ -48,17 +48,18 @@ print(df[cols])
   #  so the dataframe can be transposed with 'country' becoming column header instead of numeric indexes in df_sma
   # The transpose() 'T' is needed  because dataframe plots line series per column 
   # The iloc[::-1] is to reverse the row ordering (date shorting)
-df_plt = df_sma.head(5).set_index(country).T.iloc[::-1]
+df_plt = df_sma.head(7).set_index(country).T.iloc[::-1]
 dates = df_plt.index[0::7] # select every 7th day from the date list
 #print(dates)
-df_plt.plot(kind='line', )
+df_plt.plot(kind='line')
 # Set plot Title and Axis labels
-plt.title(str(num_days) + ' day moving average mortality for top 5 countries')
+plt.title(str(num_days) + ' day moving average mortality for top 7 countries')
 plt.xlabel('Date ->')
 plt.ylabel('Mortality (' + str(num_days) + ' Days SMA) ->')
 # Set Axis ticks
 plt.xticks(ticks=range(0, len(df_plt.index)), labels=df_plt.index, rotation='vertical')
-plt.yticks(ticks=range(0, int(df_plt.iat[len(df_plt.index)-1,0])+100, 100))
+plt.yticks(ticks=range(0, int(df_plt.max(axis=1).max())+100, 100))
+print('\n', df_plt.tail(14))
 # Show every 7th x tick label - hiding the rest
 [lbl.set_visible(False) for (i,lbl) in enumerate(plt.gca().xaxis.get_ticklabels()) if i % 7 != 0]
 # Show grid lines
