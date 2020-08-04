@@ -43,17 +43,17 @@ print('Displaying last', num_days, 'days stats for top', top_n, 'countries by mo
 print(df[cols])
 #print(pd.concat([df[cols], df_sma], axis=1))
 
-# Plot the SMA for top 5 countries
+# Plot the SMA for top 10 countries
   # Need to set the dataframe index to 'country' 
   #  so the dataframe can be transposed with 'country' becoming column header instead of numeric indexes in df_sma
   # The transpose() 'T' is needed  because dataframe plots line series per column 
   # The iloc[::-1] is to reverse the row ordering (date shorting)
-df_plt = df_sma.head(7).set_index(country).T.iloc[::-1]
+df_plt = df_sma.head(10).set_index(country).T.iloc[::-1]
 dates = df_plt.index[0::7] # select every 7th day from the date list
 #print(dates)
 df_plt.plot(kind='line')
 # Set plot Title and Axis labels
-plt.title(str(num_days) + ' day moving average mortality for top 7 countries')
+plt.title(str(num_days) + ' day moving average mortality for top 10 countries')
 plt.xlabel('Date ->')
 plt.ylabel('Mortality (' + str(num_days) + ' Days SMA) ->')
 # Set Axis ticks
