@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-radius, modulo, multiplier = 1, 360, 13
+radius, modulo, multiplier = 1, 100, 2
 ax = plt.gcf().gca()
 ax.set_aspect('equal')
 ax.add_artist(plt.Circle((0, 0), radius, edgecolor='r', facecolor='w'))
